@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Payment Assistant</title>
+<style>
+:root {
+  --blue: #2457e6;
+  --ink: #17233b;
+  --muted: #63708a;
+  --bg: #f3f6fc;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+header {
+  background: #101b35;
+  color: white;
+  padding: 24px 18px 32px;
+}
+nav {
+  max-width: 760px;
+  margin: auto;
+  font-weight: bold;
+  font-size: 19px;
+}
+.hero {
+  max-width: 760px;
+  margin: 26px auto 0;
+}
+.hero h1 {
+  font-size: 32px;
+  line-height: 1.2;
+  margin: 0 0 12px;
+}
+.hero p {
+  line-height: 1.6;
+  color: #d5def3;
+  margin-bottom: 0;
+}
+main {
+  max-width: 760px;
+  padding: 0 15px;
+  margin: -14px auto 30px;
+}
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 18px;
+  margin-bottom: 17px;
+  box-shadow: 0 5px 20px #182b5010;
+}
+h2 { font-size: 20px; margin: 0 0 9px; }
+.help { color: var(--muted); line-height: 1.5; font-size: 14px; }
+label {
+  display: block;
+  margin: 20px 0 8px;
+  font-weight: bold;
+}
+select, input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #cbd4e5;
+  border-radius: 10px;
+  font-size: 16px;
+  background: white;
+  color: var(--ink);
+}
+button {
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 15px;
+  background: var(--blue);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 17px;
+  cursor: pointer;
+}
+button:focus, select:focus, input:focus {
+  outline: 3px solid #a8c0ff;
+}
+.secondary {
+  color: var(--blue);
+  background: #eaf0ff;
+}
+#result {
+  display: none;
+  border-top: 4px solid #2baf7a;
+}
+#result h3 { margin-top: 20px; }
+#result p, #result li { line-height: 1.6; }
+.tag {
+  display: inline-block;
+  background: #e4f8ee;
+  color: #146b47;
+  padding: 7px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+}
+footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 12px 20px 28px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+<header>
+  <nav>✦ SmartPay Assistant</nav>
+  <div class="hero">
+    <h1>Payment trouble?<br>Let's solve it.</h1>
+    <p>A simple guide to understanding failed payments and finding your next step.</p>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Payment diagnosis</h2>
+    <p class="help">Choose the message or issue you encountered to see possible explanations.</p>
+
+    <label for="issue">What happened?</label>
+    <select id="issue">
+      <option value="unknown">Choose a payment issue</option>
+      <option value="funds">Insufficient balance</option>
+      <option value="bank">Bank declined the payment</option>
+      <option value="network">Network or timeout error</option>
+      <option value="limit">Transaction limit reached</option>
+      <option value="pending">Payment is pending</option>
+      <option value="unknown">Other or unclear error</option>
+    </select>
+
+    <label for="method">Payment method</label>
+    <select id="method">
+      <option>UPI</option>
+      <option>Debit card</option>
+      <option>Credit card</option>
+      <option>Net banking</option>
+      <option>Other</option>
+    </select>
+
+    <button onclick="diagnose()">Find possible solution</button>
+    <button class="secondary" onclick="resetForm()">Start again</button>
+  </section>
+
+  <section class="card" id="result" aria-live="polite">
+    <span class="tag">Suggested next steps</span>
+    <h2 id="resultTitle"></h2>
+    <p id="resultDescription"></p>
+    <h3>What you can try</h3>
+    <ul id="steps"></ul>
+    <p class="help" id="note"></p>
+  </section>
+
+  <section class="card">
+    <h2>Built for small businesses</h2>
+    <p class="help">Understand common payment issues, guide customers clearly, and know when to contact your payment provider.</p>
+  </section>
+</main>
+
+<footer>
+  SmartPay Assistant · Student project prototype<br>
+  This demo does not process payments or connect to a bank.
+  Never share your UPI PIN, password, OTP or full card details.
+</footer>
+
+<script>
+const advice = {
+  funds: {
+    title: "Check available balance",
+    description: "The account may not have enough available funds, or a temporary hold may affect the balance.",
+    steps: [
+      "Check your available bank balance.",
+      "Confirm the amount and payment details.",
+      "If money was deducted, check the transaction status before trying again."
+    ],
+    note: "This is a possible explanation, not a confirmed diagnosis."
+  },
+  bank: {
+    title: "The bank may have declined it",
+    description: "A bank security check or temporary restriction may have prevented the transaction.",
+    steps: [
+      "Check for a message from your bank.",
+      "Confirm your payment method is active.",
+      "Contact your bank or payment provider if the problem continues."
+    ],
+    note: "Only your bank or payment provider can confirm the exact reason."
+  },
+  network: {
+    title: "Check the connection and status",
+    description: "A slow connection or timeout can interrupt a payment request.",
+    steps: [
+      "Check your internet connection.",
+      "Check the transaction status in your payment app.",
+      "Do not retry repeatedly until you know whether the earlier payment succeeded."
+    ],
+    note: "A timeout does not necessarily mean the payment failed."
+  },
+  limit: {
+    title: "Check transaction limits",
+    description: "A bank, account or payment method limit may have been reached.",
+    steps: [
+      "Review your bank's applicable transaction limits.",
+      "Confirm the amount and payment method.",
+      "Ask your bank about any account-specific restrictions."
+    ],
+    note: "Limits vary by bank, payment type and account."
+  },
+  pending: {
+    title: "Confirm the final payment status",
+    description: "The payment provider or bank may still be processing the transaction.",
+    steps: [
+      "Check the transaction history.",
+      "Wait for the provider's stated processing time.",
+      "If money was deducted but the merchant has not received confirmation, contact support with the transaction reference."
+    ],
+    note: "Avoid collecting payment a second time until the status is clear."
+  },
+  unknown: {
+    title: "Get more information",
+    description: "The issue is not clear enough to identify a likely cause.",
+    steps: [
+      "Read the exact error message in the payment app.",
+      "Check the transaction status.",
+      "Contact your bank or payment provider through its official support channel."
+    ],
+    note: "Never share a PIN, OTP, password or full card details with support."
+  }
+};
+
+function diagnose() {
+  const issue = document.getElementById("issue").value;
+  const method = document.getElementById("method").value;
+  const result = advice[issue] || advice.unknown;
+
+  document.getElementById("resultTitle").textContent = result.title;
+  document.getElementById("resultDescription").textContent =
+    result.description + " Payment method: " + method + ".";
+  document.getElementById("steps").replaceChildren();
+
+  result.steps.forEach(function(step) {
+    const item = document.createElement("li");
+    item.textContent = step;
+    document.getElementById("steps").appendChild(item);
+  });
+
+  document.getElementById("note").textContent = result.note;
+  document.getElementById("result").style.display = "block";
+  document.getElementById("result").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function resetForm() {
+  document.getElementById("issue").value = "unknown";
+  document.getElementById("method").selectedIndex = 0;
+  document.getElementById("result").style.display = "none";
+}
+</script>
+</body>
+  </html>
+                                                                 
